@@ -1,11 +1,12 @@
-import { createWriteStream } from 'fs';
-import { FormEvent, useContext, useState } from 'react';
+import { FormEvent, useState } from 'react';
 import Modal from 'react-modal';
+
+import { useTransactions } from '../../hooks/useTransactions';
+
 import closeImg from '../../assets/close.svg';
 import IncomeSvg from '../../assets/income.svg';
 import OutcomeSvg from '../../assets/outcome.svg';
-import { api } from '../../services/api';
-import { TransactionsContext } from '../../TransactionsContext';
+
 import {Container, TransactionContainer, RadioBox} from './styles'
 interface NewTransactionModalProps {
     isOpen: boolean;
@@ -19,11 +20,17 @@ export function NewTransactionsModal({isOpen, onRequestClose} : NewTransactionMo
     const [type,setType] = useState('deposit');
     const [category, setCategory] = useState('')
 
-    const {createTransaction} = useContext(TransactionsContext)
-    function handleCreateNewTransaction(event:FormEvent) {
+    const {createTransaction} = useTransactions();
+    async function handleCreateNewTransaction(event:FormEvent) {
         event.preventDefault();
 
-        api.post('/transactions', createTransaction({title, amount,type, category}));
+        await createTransaction({title, amount,type, category});
+
+        onRequestClose();
+        setTitle('');
+        setAmount(0);
+        setType('deposit');
+        setCategory('');
         
     }
     return(
